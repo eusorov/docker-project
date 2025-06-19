@@ -1,0 +1,13 @@
+version: '3.6'
+services:
+  app:
+      image: ghcr.io/eusorov/tokeemo2:latest
+      env_file:
+          - "./src/.env"
+  nginx:
+      image: nginx:latest
+      volumes:
+          - "./src:/var/www/"
+          - "./siteconfs:/etc/nginx/conf.d/:ro"
+      ports:
+          - "80:80"
