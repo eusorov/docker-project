@@ -1,7 +1,7 @@
 version: '3.6'
 services:
   app:
-      image: ghcr.io/eusorov/tokeemo2:latest
+      image: ghcr.io/eusorov/docker-project:latest
       env_file:
           - "./src/.env"
   nginx:
