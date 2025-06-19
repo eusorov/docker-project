@@ -23,6 +23,10 @@ RUN composer install --no-autoloader --no-dev
 
 COPY src/ /var/www
 
+# Fix permissions for storage, bootstrap/cache, and database
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache /var/www/database && \
+    chmod -R 775 /var/www/storage /var/www/bootstrap/cache /var/www/database
+
 RUN composer dump-autoload -o
 
 RUN touch .env
