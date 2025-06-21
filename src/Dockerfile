@@ -16,12 +16,12 @@ EXPOSE 9000
 
 FROM base as production
 
-COPY src/composer.json /var/www
-COPY src/composer.lock /var/www
+COPY composer.json /var/www
+COPY composer.lock /var/www
 
 RUN composer install --no-autoloader --no-dev
 
-COPY src/ /var/www
+COPY . /var/www
 
 # Fix permissions for storage, bootstrap/cache, and database
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache /var/www/database && \

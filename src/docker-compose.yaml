@@ -9,11 +9,11 @@ services:
       # volumes:
       #  - "./src:/var/www/"
       env_file:
-          - "./src/.env"
+          - ".env"
   nginx:
-      image: nginx:latest
+      image: nginx:alpine
       volumes:
-          - "./src:/var/www/"
+          - "./:/var/www/"
           - "./siteconfs:/etc/nginx/conf.d/:ro"
       ports:
           - "80:80"
