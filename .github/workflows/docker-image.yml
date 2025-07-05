@@ -1,8 +1,8 @@
 name: Docker Image CI
 
 on:
-  push:
-    branches: [ "master" ]
+  #push:
+  #  branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
 
@@ -31,4 +31,3 @@ jobs:
       run: docker build . --file Dockerfile --tag ghcr.io/eusorov/${{ github.event.repository.name }}:latest
     - name: Push the Docker image
       run: docker push ghcr.io/eusorov/${{ github.event.repository.name }}:latest
-  
