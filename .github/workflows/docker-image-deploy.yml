@@ -35,11 +35,11 @@ jobs:
           INSTANCE_ID=i-0910ada535eb85096
           COMMAND="docker pull ghcr.io/eusorov/docker-project:latest && cd docker-project && docker compose up -d"
           COMMAND_ID=$(aws ssm send-command \
-        --document-name "AWS-RunShellScript" \
-        --targets "Key=instanceids,Values=$INSTANCE_ID" \
-        --parameters 'commands=["'"$COMMAND"'"]' \
-        --query "Command.CommandId" \
-        --output text)
+          --document-name "AWS-RunShellScript" \
+          --targets "Key=instanceids,Values=$INSTANCE_ID" \
+          --parameters 'commands=["'"$COMMAND"'"]' \
+          --query "Command.CommandId" \
+          --output text)
       - name: Wait for command to complete
         run: |
           set -x 
