@@ -27,6 +27,7 @@ jobs:
           echo "::set-output name=public_ip::$PUBLIC_IP"
       - name: Check instance
         run: |
+          INSTANCE_ID=i-0910ada535eb85096
           set -x 
           aws ec2 describe-instances --instance-ids $INSTANCE_ID --query "Reservations[0].Instances[0].State.Name" --output text
       - name: Deploy to EC2 using SSM
@@ -40,9 +41,6 @@ jobs:
           --parameters 'commands=["'"$COMMAND"'"]' \
           --query "Command.CommandId" \
           --output text)
-      - name: Wait for command to complete
-        run: |
-          set -x 
           aws ssm wait command-executed \
             --instance-id $INSTANCE_ID \
             --command-id $COMMAND_ID
