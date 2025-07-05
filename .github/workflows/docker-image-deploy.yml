@@ -27,13 +27,23 @@ jobs:
           echo "::set-output name=public_ip::$PUBLIC_IP"
       - name: Check instance
         run: |
+          set -x 
           aws ec2 describe-instances --instance-ids $INSTANCE_ID --query "Reservations[0].Instances[0].State.Name" --output text
       - name: Deploy to EC2 using SSM
         run: |
+          set -x 
           INSTANCE_ID=i-0910ada535eb85096
           COMMAND="docker pull ghcr.io/eusorov/docker-project:latest && cd docker-project && docker compose up -d"
-          aws ssm send-command \
-            --document-name "AWS-RunShellScript" \
-            --targets "Key=instanceids,Values=$INSTANCE_ID" \
-            --parameters 'commands=["'"$COMMAND"'"]' \
-            --comment "Deploying Docker image to EC2"
+          COMMAND_ID=$(aws ssm send-command \
+        --document-name "AWS-RunShellScript" \
+        --targets "Key=instanceids,Values=$INSTANCE_ID" \
+        --parameters 'commands=["'"$COMMAND"'"]' \
+        --query "Command.CommandId" \
+        --output text)
+      - name: Wait for command to complete
+        run: |
+          set -x 
+          aws ssm wait command-executed \
+            --instance-id $INSTANCE_ID \
+            --command-id $COMMAND_ID
+          aws ssm list-command-invocations --command-id $COMMAND_ID --details
