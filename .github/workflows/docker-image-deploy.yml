@@ -31,10 +31,14 @@ jobs:
           set -x 
           aws ec2 describe-instances --instance-ids $INSTANCE_ID --query "Reservations[0].Instances[0].State.Name" --output text
       - name: Deploy to EC2 using SSM
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
         run: |
           set -x 
           INSTANCE_ID=i-0910ada535eb85096
-          COMMAND="docker pull ghcr.io/eusorov/docker-project:latest && cd /home/ubuntu/docker-project && docker compose up -d"
+          
+          COMMAND="echo $DOCKER_TOKEN | docker login ghcr.io -u $DOCKER_USERNAME --password-stdin && docker pull ghcr.io/eusorov/docker-project:latest && cd /home/ubuntu/docker-project && docker compose up -d"
           
           COMMAND_ID=$(aws ssm send-command \
             --document-name "AWS-RunShellScript" \
@@ -43,7 +47,6 @@ jobs:
             --query "Command.CommandId" \
             --output text)
 
-          # If send-command fails, COMMAND_ID will be empty.
           if [ -z "$COMMAND_ID" ]; then
             echo "::error::Failed to send SSM command."
             exit 1
@@ -51,13 +54,10 @@ jobs:
 
           echo "SSM Command sent with ID: $COMMAND_ID. Waiting for execution to complete..."
 
-          # Wait for the command to finish. This will fail the step if the command on the instance fails.
           aws ssm wait command-executed \
             --command-id "$COMMAND_ID" \
             --instance-id "$INSTANCE_ID"
 
           echo "Command execution finished. Fetching output..."
 
-          # Get the full output details for debugging. The output will be in the 'StandardOutputContent'
-          # and 'StandardErrorContent' fields of the JSON.
           aws ssm list-command-invocations --command-id "$COMMAND_ID" --details
