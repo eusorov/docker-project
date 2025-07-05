@@ -28,7 +28,7 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_TOKEN }}
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag ${{ github.event.repository.name }}:$(date +%s)
+      run: docker build . --file Dockerfile --tag ghcr.io/eusorov/${{ github.event.repository.name }}:latest
     - name: Push the Docker image
-      run: docker push ${{ github.event.repository.name }}:latest
+      run: docker push ghcr.io/eusorov/${{ github.event.repository.name }}:latest
   
