@@ -27,14 +27,12 @@ jobs:
           PUBLIC_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query "Reservations[0].Instances[0].PublicIpAddress" --output text)
           echo "::set-output name=public_ip::$PUBLIC_IP"
 
-      - name: Deploy to EC2
-        env:
-          PUBLIC_IP: ${{ steps.ec2.outputs.public_ip }}
-          USER: ${{ secrets.AWS_USER }}  # Your EC2 username (e.g., ec2-user or ubuntu)
+      - name: Deploy to EC2 using SSM
         run: |
-          echo "Deploying to EC2 instance at $PUBLIC_IP"
-          ssh -o StrictHostKeyChecking=no $USER@$PUBLIC_IP << 'EOF'
-            docker pull ghcr.io/eusorov/docker-project:latest
-            cd docker-project
-            docker compose up -d
-          EOF
+          INSTANCE_ID=i-0910ada535eb85096  # Replace with your EC2 instance ID
+          COMMAND="docker pull ghcr.io/eusorov/docker-project:latest && cd docker-project && docker compose up -d"
+          aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --targets "Key=instanceids,Values=$INSTANCE_ID" \
+            --parameters 'commands=["'"$COMMAND"'"]' \
+            --comment "Deploying Docker image to EC2"
