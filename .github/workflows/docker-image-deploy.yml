@@ -26,10 +26,12 @@ jobs:
           INSTANCE_ID=i-0910ada535eb85096
           PUBLIC_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query "Reservations[0].Instances[0].PublicIpAddress" --output text)
           echo "::set-output name=public_ip::$PUBLIC_IP"
-
+      - name: Check instance
+        run: |
+          aws ec2 describe-instances --instance-ids $INSTANCE_ID --query "Reservations[0].Instances[0].State.Name" --output text
       - name: Deploy to EC2 using SSM
         run: |
-          INSTANCE_ID=i-0910ada535eb85096  # Replace with your EC2 instance ID
+          INSTANCE_ID=i-0910ada535eb85096
           COMMAND="docker pull ghcr.io/eusorov/docker-project:latest && cd docker-project && docker compose up -d"
           aws ssm send-command \
             --document-name "AWS-RunShellScript" \
